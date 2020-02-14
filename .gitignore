@@ -1,0 +1,20 @@
+# config file
+config.json
+
+# virtualenv files
+.venv
+venv/
+.virtualenv
+virtualenv/
+
+# cache Files
+.DS_Store
+.__pycache__
+
+# vscode
+.vscode
+vscode/
+
+# cache
+.cache
+cache/
