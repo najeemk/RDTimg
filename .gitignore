@@ -16,5 +16,5 @@ virtualenv/
 vscode/
 
 # cache
-#.cache
-#cache/
+.cache
+cache/
