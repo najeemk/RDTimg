@@ -1,14 +1,13 @@
 from PIL import Image
-import re
-import os
+import urllib.request #pip install urllib
 import praw #pip install praw
 import json
-import urllib.request #pip install urllib
+import re
+import os
 
 IMAGE_FORMATS = r'(?i)\.(jpg|png|tiff|jpeg)$'
 
 class Imagine:
-
     def __init__(self, config_path):
         self.config = self.readConfig(config_path)
         self.praw_instance = praw.Reddit(
@@ -18,10 +17,7 @@ class Imagine:
         if (not os.path.exists(self.config['settings']['cache_location'])):
             os.system('mkdir ' + self.config['settings']['cache_location'])
 
-    def subredditInstance(self, current_subreddit=None):
-        '''
-        Initalizes a Subreddit Instance
-        '''
+    def createSubredditInstance(self, current_subreddit=None):
         if (current_subreddit is None):
             current_subreddit = self.config['settings']['default_sub']
         self.subreddit = self.praw_instance.subreddit(current_subreddit)
@@ -30,44 +26,39 @@ class Imagine:
             "/" + current_subreddit + '.cache')
         self.readCache(self.cache_name)
 
-    def imageCycle(self):
-        for submission in self.subreddit.hot(limit=None):
-            url = submission.url.rsplit('/',1)[-1]
-            image_directory = self.config['settings']['cache_location'] + url # the directory for each image
-            if not(url in self.cache_set) and not(os.path.exists(image_directory)):
-                if re.search(IMAGE_FORMATS, url): # starts download only for image files
-                    print(submission.title)
-                    try:
-                        urllib.request.urlretrieve(submission.url, image_directory) # download image
-                        img = Image.open(image_directory) # create PIL image
-                        img.show()
-                        selection = input("Save (s), next (n), quit (q): ")
+    def generateSubmissionIter(self):
+        self.submission_iterator = iter(self.subreddit.hot(limit=None))
 
-                        if (selection == 's'):
-                            print('Saved to: ' + image_directory)
-                        elif (selection == 'n'):
-                            self.cache_set.add(url)
-                            self.writeCache()
-                            os.system('rm ' + image_directory)
-                        elif (selection == 'q'):
-                            save_fi = input("Save current image (y/n): ")
-                            if (save_fi == 'n'):
-                                os.system('rm ' + image_directory)
-                                self.cache_set.add(url)
-                            self.writeCache()
-                            exit()
-                    except urllib.error.HTTPError:
-                        print("Cannot Print Image, forbidden")
-                        self.cache_set.add(url)
-                        self.writeCache()
-                
-                    print("*" * 20 + "\n")
-
+    def imageSelection(self):
+        submission = next(self.submission_iterator)
+        self.url = submission.url.rsplit('/',1)[-1]
+        self.image_directory = self.config['settings']['cache_location'] + self.url # the directory for each image
+        if not(self.url in self.cache_set) and not(os.path.exists(self.image_directory)):
+            if re.search(IMAGE_FORMATS, self.url): # starts download only for image files
+                print(submission.title)
+                try:
+                    urllib.request.urlretrieve(submission.url, self.image_directory) # download image
+                    return Image.open(self.image_directory)   
+                except urllib.error.HTTPError:
+                    print("Cannot Print Image, forbidden")
+                    self.cache_set.add(self.url)
+                    self.writeCache()
+                    return None
+        
+    def imageOption(self, selection):
+        if (selection == 's'):
+            print('Saved to: ' + self.image_directory)
+        elif (selection == 'n'):
+            self.cache_set.add(self.url)
+            self.writeCache()
+            os.system('rm ' + self.image_directory)
+        elif (selection == 'q'):
+            os.system('rm ' + self.image_directory)
+            self.writeCache()
+            exit()
+        print("*" * 20 + "\n")
 
     def readConfig(self, config_path):
-        '''
-        Reads configuration folder
-        '''
         with open(config_path) as fi:
             config = json.load(fi)
         return config
@@ -87,7 +78,3 @@ class Imagine:
         with open(self.cache_name, 'w') as filehandle:
             for listitem in self.cache_set:
                 filehandle.write('%s\n' % listitem)
-
-
-
-        
