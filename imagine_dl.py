@@ -29,31 +29,33 @@ class Imagine:
         self.submission_iterator = iter(self.subreddit.hot(limit=None))
 
     def imageSelection(self):
-        submission = next(self.submission_iterator)
-        self.url = submission.url.rsplit('/',1)[-1]
+        self.submission = next(self.submission_iterator)
+        self.url = self.submission.url.rsplit('/',1)[-1]
         self.image_directory = self.config['settings']['cache_location'] + self.url # the directory for each image
         if not(self.url in self.cache_set) and not(os.path.exists(self.image_directory)):
             if re.search(IMAGE_FORMATS, self.url): # starts download only for image files
-                print(submission.title)
                 try:
-                    urllib.request.urlretrieve(submission.url, self.image_directory) # download image
+                    urllib.request.urlretrieve(self.submission.url, self.image_directory) # download image
                     return self.image_directory
                 except urllib.error.HTTPError:
                     print("Cannot Print Image, forbidden")
                     self.cache_set.add(self.url)
                     self.writeCache()
                     return None
+    
+    def getSubmissionInfo(self):
+        return (self.submission.title, self.submission.author, self.submission.url)
         
     def imageOption(self, selection):
-        if (selection == 'p'):
+        if (selection == 'pass'):
             return
-        elif (selection == 's'):
+        elif (selection == 'save'):
             print('Saved to: ' + self.image_directory)
-        elif (selection == 'n'):
+        elif (selection == 'next'):
             self.cache_set.add(self.url)
             self.writeCache()
             os.system('rm ' + self.image_directory)
-        elif (selection == 'q'):
+        elif (selection == 'quit'):
             os.system('rm ' + self.image_directory)
             self.writeCache()
             exit()

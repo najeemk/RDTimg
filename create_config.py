@@ -8,7 +8,8 @@ user_agent = 'imagine_client'
 settings = {
     'cache_size': 10,
     'cache_location': 'cache/',
-    'default_sub': 'wallpapers'
+    'default_sub': 'wallpapers',
+    "subreddits": ["wallpapers", "earthporn", "cozyplaces"]
 }
 praw_auth = {
     'client_id' : client_id,
