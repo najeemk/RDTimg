@@ -45,7 +45,9 @@ class Imagine:
                     return None
         
     def imageOption(self, selection):
-        if (selection == 's'):
+        if (selection == 'p'):
+            return
+        elif (selection == 's'):
             print('Saved to: ' + self.image_directory)
         elif (selection == 'n'):
             self.cache_set.add(self.url)
