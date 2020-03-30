@@ -1,4 +1,3 @@
-from PIL import Image
 import urllib.request #pip install urllib
 import praw #pip install praw
 import json
@@ -38,7 +37,7 @@ class Imagine:
                 print(submission.title)
                 try:
                     urllib.request.urlretrieve(submission.url, self.image_directory) # download image
-                    return Image.open(self.image_directory)   
+                    return self.image_directory
                 except urllib.error.HTTPError:
                     print("Cannot Print Image, forbidden")
                     self.cache_set.add(self.url)

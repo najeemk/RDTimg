@@ -18,3 +18,7 @@ vscode/
 # cache
 .cache
 cache/
+
+# test images
+.test
+test/
