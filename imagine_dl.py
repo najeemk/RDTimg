@@ -15,6 +15,7 @@ class Imagine:
             user_agent=self.config['praw_auth']['user_agent'])
         if (not os.path.exists(self.config['settings']['cache_location'])):
             os.system('mkdir ' + self.config['settings']['cache_location'])
+        print('praw instance created')
 
     def createSubredditInstance(self, current_subreddit=None):
         if (current_subreddit is None):
@@ -44,7 +45,7 @@ class Imagine:
                     return None
     
     def getSubmissionInfo(self):
-        return (self.submission.title, self.submission.author, self.submission.url)
+        return (self.submission.title, self.submission.author, self.submission.shortlink)
         
     def imageOption(self, selection):
         if (selection == 'pass'):
