@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QComboBox 
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
-from imagine_dl import Imagine
+from Imagine import Imagine
 import webbrowser
 import json
 
@@ -136,6 +136,9 @@ class ImagineGui(QWidget):
         self.post_author.setText(str(self.submission_info[1]))
 
     def closeEvent(self, *args, **kwargs):
+        '''
+        Deletes image when closing the event, and writes to cache
+        '''
         super().closeEvent(*args, **kwargs)
         self.download.imageOption('quit')
 
