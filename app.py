@@ -28,6 +28,8 @@ class ImagineGui(QWidget):
         self.post_author = QLabel()
 
         # Create the Subreddit Instance and UI
+        self.first_run = True
+        self.sorting_method = 'hot'
         self.initSubredditInstance()
         self.initUI()
         self.setFixedSize(self.size())
@@ -37,7 +39,11 @@ class ImagineGui(QWidget):
         Creates the subreddit instance
         '''
         self.download.createSubredditInstance(subreddit)
-        self.download.generateSubmissionIter()
+        self.initSortingInstance(self.sorting_method)
+    
+    def initSortingInstance(self, sort):
+        self.sorting_method = sort
+        self.download.generateSubmissionIter(sort)
         self.initImage('pass')
 
     def initUI(self):
@@ -62,7 +68,9 @@ class ImagineGui(QWidget):
 
         # create sorting selection
         sorting_picker = QComboBox()
-        sorting_picker.addItems(['hot', 'new', 'rising', 'top'])
+        sorting_picker.addItems(['hot', 'new', 'rising', 
+            'top (hour)', 'top (day)', 'top (week)', 'top (month)', 'top (year)', 'top (all time)'])
+        sorting_picker.activated[str].connect(self.initSortingInstance)
 
         # selection layout
         selection_layout = QVBoxLayout()
@@ -110,9 +118,13 @@ class ImagineGui(QWidget):
     def initImage(self, opt):
         '''
         Initializes and outputs the next image in the list
-        opt: save, pass, next, quit
+        opt: save, first, pass, next, quit
         '''
-        self.download.imageOption(opt)
+        if self.first_run:
+            self.download.imageOption('first')
+            self.first_run = False
+        else:
+            self.download.imageOption(opt)
         path = None
         while (path is None):
             path = self.download.imageSelection()
@@ -122,6 +134,10 @@ class ImagineGui(QWidget):
         print(self.submission_info[2])
         self.post_title.setText(str(self.submission_info[0]))
         self.post_author.setText(str(self.submission_info[1]))
+
+    def closeEvent(self, *args, **kwargs):
+        super().closeEvent(*args, **kwargs)
+        self.download.imageOption('quit')
 
 app = QApplication([]) # application init
 w = ImagineGui()

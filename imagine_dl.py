@@ -26,8 +26,26 @@ class Imagine:
             "/" + current_subreddit + '.cache')
         self.readCache(self.cache_name)
 
-    def generateSubmissionIter(self):
-        self.submission_iterator = iter(self.subreddit.hot(limit=None))
+    def generateSubmissionIter(self, sort):
+        if (sort == 'hot'):
+            self.submission_iterator = iter(self.subreddit.hot(limit=None))
+        elif (sort == 'new'):
+            self.submission_iterator = iter(self.subreddit.new(limit=None))
+        elif (sort == 'rising'):
+            self.submission_iterator = iter(self.subreddit.rising(limit=None))
+        elif (sort == 'top (hour)'):
+            self.submission_iterator = iter(self.subreddit.top(time_filter='hour', limit=None))
+        elif (sort == 'top (day)'):
+            self.submission_iterator = iter(self.subreddit.top(time_filter='day', limit=None))
+        elif (sort == 'top (week)'):
+            self.submission_iterator = iter(self.subreddit.top(time_filter='week', limit=None))
+        elif (sort == 'top (month)'):
+            self.submission_iterator = iter(self.subreddit.top(time_filter='month', limit=None))
+        elif (sort == 'top (year)'):
+            self.submission_iterator = iter(self.subreddit.top(time_filter='year', limit=None))
+        elif (sort == 'top (all time)'):
+            self.submission_iterator = iter(self.subreddit.top(time_filter='all', limit=None))
+        print("sorting by: " + sort)
 
     def imageSelection(self):
         self.submission = next(self.submission_iterator)
@@ -48,7 +66,10 @@ class Imagine:
         return (self.submission.title, self.submission.author, self.submission.shortlink)
         
     def imageOption(self, selection):
-        if (selection == 'pass'):
+        if (selection == 'first'):
+            return
+        elif (selection == 'pass'):
+            os.system('rm ' + self.image_directory)
             return
         elif (selection == 'save'):
             print('Saved to: ' + self.image_directory)
@@ -59,6 +80,7 @@ class Imagine:
         elif (selection == 'quit'):
             os.system('rm ' + self.image_directory)
             self.writeCache()
+            print('quitting program...')
             exit()
         print("*" * 20 + "\n")
 
