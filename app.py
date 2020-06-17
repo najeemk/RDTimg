@@ -4,8 +4,24 @@ from PyQt5.QtCore import Qt
 from Imagine import Imagine
 import webbrowser
 import json
+import sys
+import os
 
-CONFIG_PATH = 'config.json'
+
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
+CONFIG_PATH = resource_path('config/config.json')
+print(CONFIG_PATH)
+print(os.getcwd)
 
 class ImagineGui(QWidget):
     def __init__(self):
