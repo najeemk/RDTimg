@@ -24,5 +24,5 @@ imagine_json = {
 }
 
 # writes to JSON
-with open("config.json", "w") as p: 
+with open("config/config.json", "w") as p: 
      json.dump(imagine_json, p, indent=4)

@@ -9,7 +9,6 @@ lazy-object-proxy==1.4.3
 macholib==1.14
 mccabe==0.6.1
 pefile==2019.4.18
-Pillow==7.0.0
 praw==6.5.1
 prawcore==1.0.1
 PyInstaller==3.6
