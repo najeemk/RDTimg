@@ -45,3 +45,19 @@ You can add them to `config.json`
 
 ## Where Are The Images Saved?
 They are saved to a cache folder in the same directory as the program
+
+## Help! I Got An Error?
+```python
+AttributeError: '_NotSet' object has no attribute 'lower'
+[17603] Failed to execute script app
+```
+1. Make sure that `praw.ini` is in the same directory as the program
+2. Depending on OS, this may be because the current working directory from which the app was executed does not have `praw.ini`. This is most likely to occur when you try to load the app from Finder/Gnome/Explorer. 
+
+```python
+<built-in function getcwd>
+Traceback (most recent call last):
+...
+FileNotFoundError: [Errno 2] No such file or directory: '.../rdtimg/config/config.json'
+```
+* Make sure to run `python generate_config.py`
