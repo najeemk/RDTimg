@@ -18,11 +18,11 @@ praw_auth = {
 }
 
 # generates master json
-imagine_json = {
+config_json = {
     "settings" : settings,
     "praw_auth" : praw_auth
 }
 
 # writes to JSON
 with open("config/config.json", "w") as p: 
-     json.dump(imagine_json, p, indent=4)
+     json.dump(config_json, p, indent=4)

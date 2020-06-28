@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QComboBox 
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
-from Imagine import Imagine
+from RDTIMG import RDTIMG
 import webbrowser
 import json
 import sys
@@ -23,18 +23,18 @@ CONFIG_PATH = resource_path('config/config.json')
 print(CONFIG_PATH)
 print(os.getcwd)
 
-class ImagineGui(QWidget):
+class RDTIMGGui(QWidget):
     def __init__(self):
         super().__init__()
         # loads config file
         with open(CONFIG_PATH) as fi:
             self.config = json.load(fi)
 
-        self.setWindowTitle('Imagine Image Downloader')
+        self.setWindowTitle('RDTIMG Image Downloader')
         self.window_size = (800, 450)
 
-        # sets up Imagine, reddit instance, and the UI
-        self.download = Imagine(CONFIG_PATH)
+        # sets up RDTIMG, reddit instance, and the UI
+        self.download = RDTIMG(CONFIG_PATH)
 
         # need to create this ahead of time
         self.labelImage = QLabel() 
@@ -159,5 +159,5 @@ class ImagineGui(QWidget):
         self.download.imageOption('quit')
 
 app = QApplication([]) # application init
-w = ImagineGui()
+w = RDTIMGGui()
 app.exec_()

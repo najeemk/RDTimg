@@ -7,7 +7,7 @@ import os
 
 IMAGE_FORMATS = r'(?i)\.(jpg|png|tiff|jpeg)$'
 
-class Imagine:
+class RDTIMG:
     def __init__(self, config_path):
         self.config = self.readConfig(config_path)
         self.praw_instance = praw.Reddit(

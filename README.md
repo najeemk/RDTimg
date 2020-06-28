@@ -1,17 +1,17 @@
-# Imagine Reddit Image Downloader
+# RDTIMG Reddit Image Downloader
 > A fast, cross-platform, and minimalistic image viewer and downloader!
 
-Tested on: Ubuntu
+Tested on: MacOS Catalina, Ubuntu
 
-![Screenshot of Imagine GUI](screenshot.png)
+![Screenshot of GUI](screenshot.png)
 ## How To Build?
-> Instructions for Ubuntu
+> Instructions for MacOS Catalina, Ubuntu
 
 Install Dependencies:
 First, install Anaconda, Miniconda (preferred), or VirtualEnv:<br /> (replace conda with whatever virtual environment you are using)
 ```bash
-conda create -n imagine python=3.7
-conda activate imagine
+conda create -n rdtimg python=3.7
+conda activate rdtimg
 python -m  pip install -r requirements.txt
 ```
 
