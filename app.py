@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QComboBox
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
-from RDT_Wrapper import RDT_Wrapper
+from RDT_Wrapper_Async import RDT_Wrapper_Async
 import webbrowser
 import json
 import sys
@@ -38,7 +38,7 @@ class RDTIMGGui(QWidget):
         self.window_size = (800, 450)
 
         # sets up RDTIMG, Reddit instance, and the UI
-        self.download = RDT_Wrapper(CONFIG_PATH)
+        self.rdt_instance = RDT_Wrapper_Async(CONFIG_PATH)
 
         # need to create this ahead of time
         self.labelImage = QLabel()
@@ -59,13 +59,13 @@ class RDTIMGGui(QWidget):
         """
         Creates the subreddit instance
         """
-        self.download.create_subreddit_instance(subreddit)
+        self.rdt_instance.create_subreddit_instance(subreddit)
         self.init_sorting_instance(self.sorting_method)
 
     def init_sorting_instance(self, sort):
         self.sorting_method = sort
-        self.download.generate_submission_iter(sort)
-        self.init_image('pass')
+        self.rdt_instance.generate_submission_iter(sort)
+        self.image_cycle('pass')
 
     def init_ui(self):
         """
@@ -124,34 +124,43 @@ class RDTIMGGui(QWidget):
         open_btn = QPushButton('Open in Reddit')
         save_btn = QPushButton('Save')
         next_btn = QPushButton('Next')
+        queue_btn = QPushButton('debug')
 
         open_btn.clicked.connect(lambda x: webbrowser.open(self.submission_info[2]))
-        save_btn.clicked.connect(lambda x: self.init_image('save'))
-        next_btn.clicked.connect(lambda x: self.init_image('next'))
+        save_btn.clicked.connect(lambda x: self.image_cycle('save'))
+        next_btn.clicked.connect(lambda x: self.image_cycle('next'))
+        queue_btn.clicked.connect(lambda x: self.image_cycle('debug'))
 
         # create button container and add buttons to it
         button_stack = QHBoxLayout()
         button_stack.addWidget(open_btn)
         button_stack.addWidget(save_btn)
         button_stack.addWidget(next_btn)
+        button_stack.addWidget(queue_btn)
         return button_stack
 
-    def init_image(self, opt):
+    def image_cycle(self, opt):
         """
         Initializes and outputs the next image in the list
         opt: save, first, pass, next, quit
         """
         if self.first_run:
-            self.download.image_option('first')
+            self.rdt_instance.image_option('first')
             self.first_run = False
         else:
-            self.download.image_option(opt)
+            self.rdt_instance.image_option(opt)
         path = None
-        while path is None:
-            path = self.download.image_selection()
-        pixmap = QPixmap(path).scaled(self.window_size[0], self.window_size[1], Qt.KeepAspectRatio)
+        img = None
+
+        while img is None and path is None:
+            img, path = self.rdt_instance.image_selection()
+            print("Looking for an Image")
+        print("Found Image -> Printing to Screen")
+        pixmap_raw = QPixmap()
+        pixmap_raw.loadFromData(img)
+        pixmap = pixmap_raw.scaled(self.window_size[0], self.window_size[1], Qt.KeepAspectRatio)
         self.labelImage.setPixmap(pixmap)
-        self.submission_info = self.download.get_submission_info()
+        self.submission_info = self.rdt_instance.get_submission_info()
         print(self.submission_info[2])
         self.post_title.setText(str(self.submission_info[0]))
         self.post_author.setText(str(self.submission_info[1]))
@@ -162,7 +171,7 @@ class RDTIMGGui(QWidget):
         Deletes image when closing the event, and writes to cache
         """
         super().closeEvent(*args, **kwargs)
-        self.download.image_option('quit')
+        self.rdt_instance.image_option('quit')
 
 
 app = QApplication([])  # application init
