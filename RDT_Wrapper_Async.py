@@ -1,7 +1,5 @@
 from sys import exit
 from queue import Queue
-import urllib.request
-import urllib.error
 import requests
 import praw
 import json
@@ -26,9 +24,10 @@ class RDT_Wrapper_Async:
         self.cache_name = None
 
         self.submission_iterator = None
-        self.submission_queue = Queue(maxsize=3)
+        self.submission_queue = Queue(maxsize=10)
 
         self.current_submission_meta = None
+        self.current_submission = None
         self.url = None
         self.current_image_directory = None
 
@@ -75,9 +74,12 @@ class RDT_Wrapper_Async:
         if self.submission_queue.empty():
             while not(self.submission_queue.full()):
                 submission = next(self.submission_iterator)
-                resp = requests.get(submission.url)
-                print(submission.title)
-                self.submission_queue.put([submission, resp])
+                if re.search(IMAGE_FORMATS, submission.url.rsplit('/', 1)[-1]):  # starts download only for image files
+                    resp = requests.get(submission.url)
+                    print(submission.title)
+                    self.submission_queue.put([submission, resp])
+                else:
+                    print(submission.title + " is not an image")
 
     def image_selection(self):
         self.queue_images()
@@ -86,17 +88,16 @@ class RDT_Wrapper_Async:
         self.url = self.current_submission_meta.url.rsplit('/', 1)[-1]
         self.current_image_directory = self.config['settings']['cache_location'] + self.url  # the directory for each image
         if not (os.path.exists(self.current_image_directory)):
-            # TODO: Readd not (self.url in self.cache_set) cache set
-            if re.search(IMAGE_FORMATS, self.url):  # starts download only for image files
-                #with open(self.current_image_directory, "wb") as file:
-                    #file.write(self.current_submission[1].content)
-                print(self.current_image_directory)
-                return self.current_submission[1].content, self.current_image_directory
-            else:
-                print("NOT AN IMAGE")
+            print(self.current_image_directory)
+            return self.current_submission[1].content, self.current_image_directory
         else:
             print(not (self.url in self.cache_set) )
             print(not (os.path.exists(self.current_image_directory)))
+            return None, None
+
+    def write_image(self):
+        with open(self.current_image_directory, "wb") as file:
+            file.write(self.current_submission[1].content)
 
     def get_submission_info(self):
         return self.current_submission_meta.title, self.current_submission_meta.author, self.current_submission_meta.shortlink
@@ -105,6 +106,7 @@ class RDT_Wrapper_Async:
         if selection == 'first' or selection == 'pass':
             return
         elif selection == 'save':
+            self.write_image()
             print('Saved to: ' + self.current_image_directory)
         elif selection == 'next':
             self.cache_set.add(self.url)
