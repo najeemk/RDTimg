@@ -1,28 +1,32 @@
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QComboBox 
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QComboBox
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
-from RDTIMG import RDTIMG
+from RDT_Wrapper import RDT_Wrapper
 import webbrowser
 import json
 import sys
 import os
 
 
-
 def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
+    """
+    Get absolute path to resource, works for dev and for PyInstaller
+    From: https://stackoverflow.com/questions/7674790/bundling-data-files-with-pyinstaller-onefile
+    """
     try:
         # PyInstaller creates a temp folder and stores path in _MEIPASS
+        # noinspection PyUnresolvedReferences
         base_path = sys._MEIPASS
-    except Exception:
+    except AttributeError:
         base_path = os.path.abspath(".")
 
     return os.path.join(base_path, relative_path)
 
-CONFIG_PATH = resource_path('config/config.json')
-print(CONFIG_PATH)
-print(os.getcwd)
 
+CONFIG_PATH = resource_path('config/config.json')
+
+
+# noinspection PyArgumentList
 class RDTIMGGui(QWidget):
     def __init__(self):
         super().__init__()
@@ -33,60 +37,62 @@ class RDTIMGGui(QWidget):
         self.setWindowTitle('RDTIMG Image Downloader')
         self.window_size = (800, 450)
 
-        # sets up RDTIMG, reddit instance, and the UI
-        self.download = RDTIMG(CONFIG_PATH)
+        # sets up RDTIMG, Reddit instance, and the UI
+        self.download = RDT_Wrapper(CONFIG_PATH)
 
         # need to create this ahead of time
-        self.labelImage = QLabel() 
+        self.labelImage = QLabel()
         self.labelImage.setFixedSize(self.window_size[0], self.window_size[1])
         self.labelImage.setAlignment(Qt.AlignCenter)
         self.post_title = QLabel()
         self.post_author = QLabel()
+        self.submission_info = None
 
         # Create the Subreddit Instance and UI
         self.first_run = True
         self.sorting_method = 'hot'
-        self.initSubredditInstance()
-        self.initUI()
+        self.init_subreddit_instance()
+        self.init_ui()
         self.setFixedSize(self.size())
 
-    def initSubredditInstance(self, subreddit=None):
-        '''
+    def init_subreddit_instance(self, subreddit=None):
+        """
         Creates the subreddit instance
-        '''
-        self.download.createSubredditInstance(subreddit)
-        self.initSortingInstance(self.sorting_method)
-    
-    def initSortingInstance(self, sort):
-        self.sorting_method = sort
-        self.download.generateSubmissionIter(sort)
-        self.initImage('pass')
+        """
+        self.download.create_subreddit_instance(subreddit)
+        self.init_sorting_instance(self.sorting_method)
 
-    def initUI(self):
-        '''
+    def init_sorting_instance(self, sort):
+        self.sorting_method = sort
+        self.download.generate_submission_iter(sort)
+        self.init_image('pass')
+
+    def init_ui(self):
+        """
         Creates main gui containers
-        '''
+        """
         v_stack = QVBoxLayout()
-        v_stack.addWidget(self.initTopBar()) # top bar
-        v_stack.addWidget(self.labelImage) # image
-        v_stack.addLayout(self.initBottomBar()) # bottom bar
+        v_stack.addWidget(self.init_top_bar())  # top bar
+        v_stack.addWidget(self.labelImage)  # image
+        v_stack.addLayout(self.init_bottom_bar())  # bottom bar
         self.setLayout(v_stack)
         self.show()
 
-    def initTopBar(self):
-        '''
-        Must be called from initUI. The stack is the highest layer, and the one returned,
-        '''
+    def init_top_bar(self):
+        """
+        Must be called from init_ui. The stack is the highest layer, and the one returned,
+        """
         # create subreddit seleciton
         subreddit_picker = QComboBox()
         subreddit_picker.addItems(self.config['settings']['subreddits'])
-        subreddit_picker.activated[str].connect(self.initSubredditInstance)
+        subreddit_picker.activated[str].connect(self.init_subreddit_instance)
 
         # create sorting selection
         sorting_picker = QComboBox()
-        sorting_picker.addItems(['hot', 'new', 'rising', 
-            'top (hour)', 'top (day)', 'top (week)', 'top (month)', 'top (year)', 'top (all time)'])
-        sorting_picker.activated[str].connect(self.initSortingInstance)
+        sorting_picker.addItems(['hot', 'new', 'rising',
+                                 'top (hour)', 'top (day)', 'top (week)', 'top (month)', 'top (year)',
+                                 'top (all time)'])
+        sorting_picker.activated[str].connect(self.init_sorting_instance)
 
         # selection layout
         selection_layout = QVBoxLayout()
@@ -110,54 +116,55 @@ class RDTIMGGui(QWidget):
 
         return sized_top_stack
 
-    def initBottomBar(self):
-        '''
-        Must be called from initUI
-        '''
+    def init_bottom_bar(self):
+        """
+        Must be called from init_ui
+        """
         # create save and next buttons
         open_btn = QPushButton('Open in Reddit')
         save_btn = QPushButton('Save')
         next_btn = QPushButton('Next')
 
         open_btn.clicked.connect(lambda x: webbrowser.open(self.submission_info[2]))
-        save_btn.clicked.connect(lambda x: self.initImage('save'))
-        next_btn.clicked.connect(lambda x: self.initImage('next'))
+        save_btn.clicked.connect(lambda x: self.init_image('save'))
+        next_btn.clicked.connect(lambda x: self.init_image('next'))
 
         # create button container and add buttons to it
-        button_stack = QHBoxLayout() 
+        button_stack = QHBoxLayout()
         button_stack.addWidget(open_btn)
         button_stack.addWidget(save_btn)
         button_stack.addWidget(next_btn)
         return button_stack
 
-
-    def initImage(self, opt):
-        '''
+    def init_image(self, opt):
+        """
         Initializes and outputs the next image in the list
         opt: save, first, pass, next, quit
-        '''
+        """
         if self.first_run:
-            self.download.imageOption('first')
+            self.download.image_option('first')
             self.first_run = False
         else:
-            self.download.imageOption(opt)
+            self.download.image_option(opt)
         path = None
-        while (path is None):
-            path = self.download.imageSelection()
+        while path is None:
+            path = self.download.image_selection()
         pixmap = QPixmap(path).scaled(self.window_size[0], self.window_size[1], Qt.KeepAspectRatio)
         self.labelImage.setPixmap(pixmap)
-        self.submission_info = self.download.getSubmissionInfo()
+        self.submission_info = self.download.get_submission_info()
         print(self.submission_info[2])
         self.post_title.setText(str(self.submission_info[0]))
         self.post_author.setText(str(self.submission_info[1]))
 
     def closeEvent(self, *args, **kwargs):
-        '''
+        """
+        Overrides: PyQt5.QtWidgets.QWidget.QWidget.closeEvent
         Deletes image when closing the event, and writes to cache
-        '''
+        """
         super().closeEvent(*args, **kwargs)
-        self.download.imageOption('quit')
+        self.download.image_option('quit')
 
-app = QApplication([]) # application init
+
+app = QApplication([])  # application init
 w = RDTIMGGui()
 app.exec_()

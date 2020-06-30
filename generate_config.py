@@ -3,7 +3,7 @@ import json
 # listens for the client input
 client_id = input("Enter your client_id: ")
 client_secret = input("Enter your client_secret: ")
-user_agent = 'imagine_client'
+user_agent = 'rdt_client'
 
 settings = {
     'cache_size': 10,
@@ -12,17 +12,17 @@ settings = {
     "subreddits": ["wallpapers", "earthporn", "cozyplaces"]
 }
 praw_auth = {
-    'client_id' : client_id,
-    'client_secret' : client_secret,
-    'user_agent' : user_agent
+    'client_id': client_id.strip(),
+    'client_secret': client_secret.strip(),
+    'user_agent': user_agent
 }
 
 # generates master json
 config_json = {
-    "settings" : settings,
-    "praw_auth" : praw_auth
+    "settings": settings,
+    "praw_auth": praw_auth
 }
 
 # writes to JSON
-with open("config/config.json", "w") as p: 
-     json.dump(config_json, p, indent=4)
+with open("config/config.json", "w") as p:
+    json.dump(config_json, p, indent=4)
